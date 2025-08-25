@@ -12,6 +12,7 @@ helm upgrade --install airflow apache-airflow/airflow `
   --values values.yaml
 
 
+kubectl create clusterrolebinding default-admin --clusterrole cluster-admin --serviceaccount=airflow:airflow-worker --namespace spark-operator
 
 
 kubectl port-forward svc/airflow-api-server 8080:8080 --namespace airflow
