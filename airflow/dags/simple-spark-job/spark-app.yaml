@@ -1,0 +1,27 @@
+# airflow/dags/spark-example/spark-app.yaml
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: "{{ params.spark_app_name }}"
+  namespace: "{{ params.spark_namespace }}"
+spec:
+  timeToLiveSeconds: 600
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: "{{ params.spark_image | default('osds-spark8s') }}"
+  imagePullPolicy: Always
+  mainApplicationFile: "{{ params.main_file | default('local:///opt/spark/examples/src/main/python/pi.py') }}"
+  sparkVersion: 4.0.0
+  driver:
+    coreLimit: "1"
+    coreRequest: "1m"
+    memory: "512m"
+    labels: { version: "3.5.0" }
+    serviceAccount: spark
+  executor:
+    coreLimit: "1"
+    coreRequest: "1m"
+    instances: {{ params.executor_instances | default(1) }}
+    memory: "512m"
+    labels: { version: "3.5.0" }
