@@ -29,7 +29,7 @@ with DAG(
         "spark_namespace": "spark-operator",
         "spark_image": "mabi/postgres_extractor_job:latest",
         "executor_instances": 1,
-        "main_file": "local:///opt/app/spark_postgres_to_polaris.py",
+        "main_file": "local:///opt/app/postgres_to_polaris.py",
         "spark_app_name": "postgres-extractor-job",
         # Added environment variables
         "JDBC_URL": "jdbc:postgresql://host:5432/dbname",

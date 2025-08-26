@@ -83,7 +83,7 @@ JDBC_DRIVER = env("JDBC_DRIVER", "org.postgresql.Driver")
 
 JDBC_TABLE = env("JDBC_TABLE", required=True)
 JDBC_QUERY = env("JDBC_QUERY", required=True)
-APP_NAME = env("APP_NAME", required=True)
+APP_NAME = env("APP_NAME", "postgres-to-polaris")
 
 
 spark = SparkSession.builder.appName("APP_NAME").getOrCreate()
