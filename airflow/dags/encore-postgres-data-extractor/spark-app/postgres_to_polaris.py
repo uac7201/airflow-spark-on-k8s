@@ -86,7 +86,7 @@ JDBC_QUERY = env("JDBC_QUERY", required=True)
 APP_NAME = env("APP_NAME", "postgres-to-polaris")
 
 
-spark = SparkSession.builder.appName("APP_NAME").getOrCreate()
+spark = SparkSession.builder.appName(APP_NAME).getOrCreate()
 spark.sparkContext.setLogLevel("WARN")
 
 
