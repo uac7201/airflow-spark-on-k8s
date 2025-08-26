@@ -12,20 +12,23 @@ spec:
   image: "{{ params.spark_image }}"
   imagePullPolicy: Always
   mainApplicationFile: "{{ params.main_file }}"
-  sparkVersion: 4.0.0
+
+  # ⚠️ Make sure this matches your image’s Spark distro
+  sparkVersion: "3.5.1"
+
+  # (Recommended) bring the needed jars at runtime
+  deps:
+    packages:
+      - org.postgresql:postgresql:42.7.4
+      - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.9.1
+
   driver:
     coreLimit: "1"
-    coreRequest: "1m"
+    coreRequest: "1"         # don't use "1m" here; request 1 CPU, not 1 milliCPU
     memory: "512m"
-    labels: { version: "3.5.0" }
+    labels: { version: "3.5.1" }
     serviceAccount: spark
-  executor:
-    coreLimit: "1"
-    coreRequest: "1m"
-    instances: {{ params.executor_instances | default(1) }}
-    memory: "512m"
-    labels: { version: "3.5.0" }
-    env:
+    env:                      # ✅ add envs here for the driver
       - name: JDBC_URL
         value: "{{ params.JDBC_URL }}"
       - name: JDBC_USERNAME
@@ -41,3 +44,24 @@ spec:
       - name: APP_NAME
         value: "{{ params.APP_NAME }}"
 
+  executor:
+    coreLimit: "1"
+    coreRequest: "1"
+    instances: {{ params.executor_instances | default(1) }}
+    memory: "512m"
+    labels: { version: "3.5.1" }
+    env:                      # keep them for executors too (some jobs use them)
+      - name: JDBC_URL
+        value: "{{ params.JDBC_URL }}"
+      - name: JDBC_USERNAME
+        value: "{{ params.JDBC_USERNAME }}"
+      - name: JDBC_PASSWORD
+        value: "{{ params.JDBC_PASSWORD }}"
+      - name: JDBC_DRIVER
+        value: "{{ params.JDBC_DRIVER }}"
+      - name: JDBC_TABLE
+        value: "{{ params.JDBC_TABLE }}"
+      - name: JDBC_QUERY
+        value: "{{ params.JDBC_QUERY }}"
+      - name: APP_NAME
+        value: "{{ params.APP_NAME }}"
