@@ -12,23 +12,15 @@ spec:
   image: "{{ params.spark_image }}"
   imagePullPolicy: Always
   mainApplicationFile: "{{ params.main_file }}"
-
-  # ⚠️ Make sure this matches your image’s Spark distro
-  sparkVersion: "3.5.1"
-
-  # (Recommended) bring the needed jars at runtime
-  deps:
-    packages:
-      - org.postgresql:postgresql:42.7.4
-      - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.9.1
+  sparkVersion: 4.0.0
 
   driver:
     coreLimit: "1"
-    coreRequest: "1"         # don't use "1m" here; request 1 CPU, not 1 milliCPU
+    coreRequest: "1m"
     memory: "512m"
-    labels: { version: "3.5.1" }
+    labels: { version: "3.5.0" }
     serviceAccount: spark
-    env:                      # ✅ add envs here for the driver
+    env:                      # keep them for executors too (some jobs use them)
       - name: JDBC_URL
         value: "{{ params.JDBC_URL }}"
       - name: JDBC_USERNAME
@@ -46,11 +38,11 @@ spec:
 
   executor:
     coreLimit: "1"
-    coreRequest: "1"
+    coreRequest: "1m"
     instances: {{ params.executor_instances | default(1) }}
     memory: "512m"
-    labels: { version: "3.5.1" }
-    env:                      # keep them for executors too (some jobs use them)
+    labels: { version: "3.5.0" }
+    env:
       - name: JDBC_URL
         value: "{{ params.JDBC_URL }}"
       - name: JDBC_USERNAME
@@ -65,3 +57,4 @@ spec:
         value: "{{ params.JDBC_QUERY }}"
       - name: APP_NAME
         value: "{{ params.APP_NAME }}"
+
