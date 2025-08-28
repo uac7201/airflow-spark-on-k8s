@@ -2,16 +2,16 @@
 apiVersion: sparkoperator.k8s.io/v1beta2
 kind: SparkApplication
 metadata:
-  name: "{{ params.spark_app_name }}"
-  namespace: "{{ params.spark_namespace }}"
+ name: "{{ dag_run.conf.get('APP_NAME', params.spark_app_name) }}-{{ ts_nodash }}"
+ namespace: "{{ dag_run.conf.get('spark_namespace', params.spark_namespace) }}"
 spec:
   timeToLiveSeconds: 600
   type: Python
   pythonVersion: "3"
   mode: cluster
-  image: "{{ params.spark_image }}"
+  image: "{{ dag_run.conf.get('spark_image', params.spark_image) }}"
   imagePullPolicy: Always
-  mainApplicationFile: "{{ params.main_file }}"
+  mainApplicationFile: "{{ dag_run.conf.get('main_file', params.main_file) }}"
   sparkVersion: 4.0.0
 
   driver:
