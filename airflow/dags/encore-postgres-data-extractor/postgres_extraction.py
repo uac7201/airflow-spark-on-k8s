@@ -5,7 +5,10 @@ from airflow import DAG
 from airflow.utils import timezone
 from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator
 
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+
+_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = _THIS_DIR
+APP_FILE = "spark-postgres-extractor.yaml"
 
 default_args = {
     "owner": "Howdy",
@@ -19,7 +22,6 @@ with DAG(
     schedule=None,                              # keep None while testing conf
     catchup=False,
     render_template_as_native_obj=True,         # preserve int/bool types
-    template_searchpath=[THIS_DIR],             # <-- points to the folder that has the YAML
     params={                                    # defaults (overridden by dag_run.conf)
         "spark_namespace": "spark-operator",
         "spark_image": "mabi/postgres_extractor_job:latest",
@@ -38,7 +40,7 @@ with DAG(
 
     submit_spark = SparkKubernetesOperator(
         task_id="submit_spark",
-        application_file="spark-postgres-extractor.yaml",   # resolves via template_searchpath
+        application_file=APP_FILE,   # resolves via template_searchpath
         namespace="{{ dag_run.conf.get('spark_namespace', params.spark_namespace) }}",
         kubernetes_conn_id="kubernetes_default",
         do_xcom_push=False,
