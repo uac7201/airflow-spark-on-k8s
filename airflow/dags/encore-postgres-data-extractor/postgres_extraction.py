@@ -12,6 +12,7 @@ _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = _THIS_DIR
 APP_FILE = "spark-postgres-extractor.yaml"
 
+
 default_args = {
     "owner": "Howdy",
     "retries": 0,
