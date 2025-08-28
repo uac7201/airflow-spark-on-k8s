@@ -1,6 +1,6 @@
 from datetime import timedelta
 import os
-
+from airflow.operators.bash import BashOperator
 from airflow import DAG
 from airflow.utils import timezone
 from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator
