@@ -19,7 +19,7 @@ default_args = {
 }
 
 with DAG(
-    dag_id="extract_data_from_postgres_job",
+    dag_id="encore-example-worfklow",
     start_date=timezone.datetime(2025, 8, 24, tzinfo=timezone.utc),
     schedule="@daily",
     catchup=False,

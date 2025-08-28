@@ -1,0 +1,59 @@
+# airflow/dags/spark-example/spark-app.yaml
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: "{{ params.spark_app_name }}"
+  namespace: "{{ params.spark_namespace }}"
+spec:
+  timeToLiveSeconds: 600
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: "{{ params.spark_image }}"
+  imagePullPolicy: Always
+  mainApplicationFile: "{{ params.main_file }}"
+  sparkVersion: 4.0.0
+
+  driver:
+    coreLimit: "1"
+    coreRequest: "1m"
+    memory: "512m"
+    labels: { version: "3.5.0" }
+    serviceAccount: spark
+    env:
+      - name: JDBC_URL
+        value: "{{ dag_run.conf.get('JDBC_URL', params.JDBC_URL) }}"
+      - name: JDBC_USERNAME
+        value: "{{ dag_run.conf.get('JDBC_USERNAME', params.JDBC_USERNAME) }}"
+      - name: JDBC_PASSWORD
+        value: "{{ dag_run.conf.get('JDBC_PASSWORD', params.JDBC_PASSWORD) }}"
+      - name: JDBC_DRIVER
+        value: "{{ dag_run.conf.get('JDBC_DRIVER', params.JDBC_DRIVER) }}"
+      - name: JDBC_TABLE
+        value: "{{ dag_run.conf.get('JDBC_TABLE', params.JDBC_TABLE) }}"
+      - name: JDBC_QUERY
+        value: "{{ dag_run.conf.get('JDBC_QUERY', params.JDBC_QUERY) }}"
+      - name: APP_NAME
+        value: "{{ dag_run.conf.get('APP_NAME', params.APP_NAME) }}"
+
+  executor:
+    coreLimit: "1"
+    coreRequest: "1m"
+    instances: {{ params.executor_instances | default(1) }}
+    memory: "512m"
+    labels: { version: "3.5.0" }
+    env:
+      - name: JDBC_URL
+        value: "{{ dag_run.conf.get('JDBC_URL', params.JDBC_URL) }}"
+      - name: JDBC_USERNAME
+        value: "{{ dag_run.conf.get('JDBC_USERNAME', params.JDBC_USERNAME) }}"
+      - name: JDBC_PASSWORD
+        value: "{{ dag_run.conf.get('JDBC_PASSWORD', params.JDBC_PASSWORD) }}"
+      - name: JDBC_DRIVER
+        value: "{{ dag_run.conf.get('JDBC_DRIVER', params.JDBC_DRIVER) }}"
+      - name: JDBC_TABLE
+        value: "{{ dag_run.conf.get('JDBC_TABLE', params.JDBC_TABLE) }}"
+      - name: JDBC_QUERY
+        value: "{{ dag_run.conf.get('JDBC_QUERY', params.JDBC_QUERY) }}"
+      - name: APP_NAME
+        value: "{{ dag_run.conf.get('APP_NAME', params.APP_NAME) }}"
