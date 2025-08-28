@@ -37,6 +37,12 @@ with DAG(
     },
     tags=["spark", "kubernetes", "spark-operator"],
 ) as dag:
+    
+    print_conf = BashOperator(
+        task_id="print_conf",
+        # Pretty-print if jq is available; otherwise just echo JSON
+        bash_command="echo '{{ dag_run.conf | tojson }}' | jq . || echo '{{ dag_run.conf | tojson }}'"
+    )
 
     submit_spark = SparkKubernetesOperator(
         task_id="submit_spark",
@@ -46,4 +52,4 @@ with DAG(
         do_xcom_push=False,
     )
 
-    submit_spark
+    print_conf >> submit_spark
