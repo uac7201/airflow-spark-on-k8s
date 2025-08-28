@@ -10,7 +10,7 @@ from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import (
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = _THIS_DIR
-APP_FILE = "spark-postgres-extractor.yaml"
+APP_FILE = "spark-load-data.yaml"
 
 default_args = {
     "owner": "Howdy",
