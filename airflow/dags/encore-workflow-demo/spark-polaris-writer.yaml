@@ -1,0 +1,84 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: "{{ dag_run.conf.get('APP_NAME', params.APP_NAME) }}-{{ ts_nodash }}"
+  namespace: "{{ dag_run.conf.get('spark_namespace', params.spark_namespace) }}"
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+
+  # Use Spark 3.5.x for best Iceberg runtime compatibility unless your image provides Spark 4 support.
+  sparkVersion: "{{ dag_run.conf.get('spark_version', params.get('spark_version', '3.5.1')) }}"
+  image: "{{ dag_run.conf.get('spark_image_iceberg', params.spark_image_iceberg) }}"
+  imagePullPolicy: Always
+
+  # Your Polaris writer script in the image
+  mainApplicationFile: "{{ dag_run.conf.get('main_file', params.get('main_file', 'local:///opt/app/write_to_polaris.py')) }}"
+  timeToLiveSeconds: 600
+
+  sparkConf:
+    # Iceberg runtime (default: Spark 3.5, Scala 2.12). Override via dag_run.conf if you use a different Spark/Scala.
+    "spark.jars.packages": "{{ dag_run.conf.get('spark_packages', params.get('spark_packages', 'org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.9.1')) }}"
+    "spark.kubernetes.submission.waitAppCompletion": "true"
+    "spark.jars.ivy": "/tmp/.ivy2"
+    # Optional: reduce driver log noise
+    # "spark.ui.showConsoleProgress": "true"
+    # "spark.sql.shuffle.partitions": "{{ dag_run.conf.get('shuffle_partitions', params.get('shuffle_partitions', '200')) }}"
+
+  driver:
+    serviceAccount: spark
+    cores: 1
+    coreRequest: "500m"
+    coreLimit: "1"
+    memory: "1g"
+    env:
+      - name: PYTHONUNBUFFERED
+        value: "1"
+
+      # Polaris / Iceberg REST
+      - name: POLARIS_ALIAS
+        value: "{{ dag_run.conf.get('POLARIS_ALIAS', params.get('POLARIS_ALIAS', 'polaris')) }}"
+      - name: POLARIS_URI
+        value: "{{ dag_run.conf.get('POLARIS_URI', params.POLARIS_URI) }}"
+      - name: POLARIS_WAREHOUSE
+        value: "{{ dag_run.conf.get('POLARIS_WAREHOUSE', params.get('POLARIS_WAREHOUSE', '')) }}"
+
+      # OAuth2 client-credentials (recommended). Use K8s Secrets in real runs.
+      - name: POLARIS_OAUTH2_TOKEN_URL
+        value: "{{ dag_run.conf.get('POLARIS_OAUTH2_TOKEN_URL', params.get('POLARIS_OAUTH2_TOKEN_URL', 'https://<your-host>/oauth/token')) }}"
+      - name: POLARIS_OAUTH2_CLIENT_ID
+        value: "{{ dag_run.conf.get('POLARIS_OAUTH2_CLIENT_ID', params.get('POLARIS_OAUTH2_CLIENT_ID', '')) }}"
+      - name: POLARIS_OAUTH2_CLIENT_SECRET
+        value: "{{ dag_run.conf.get('POLARIS_OAUTH2_CLIENT_SECRET', params.get('POLARIS_OAUTH2_CLIENT_SECRET', '')) }}"
+      - name: POLARIS_OAUTH2_SCOPE
+        value: "{{ dag_run.conf.get('POLARIS_OAUTH2_SCOPE', params.get('POLARIS_OAUTH2_SCOPE', 'PRINCIPAL_ROLE:ALL')) }}"
+
+      # Optional fallback: static bearer token (if your setup uses it)
+      - name: POLARIS_BEARER_TOKEN
+        value: "{{ dag_run.conf.get('POLARIS_BEARER_TOKEN', params.get('POLARIS_BEARER_TOKEN', '')) }}"
+
+      # Target table
+      - name: TARGET_NAMESPACE
+        value: "{{ dag_run.conf.get('TARGET_NAMESPACE', params.get('TARGET_NAMESPACE', 'bronze')) }}"
+      - name: TARGET_TABLE
+        value: "{{ dag_run.conf.get('TARGET_TABLE', params.get('TARGET_TABLE', 'widgets')) }}"
+      - name: WRITE_MODE
+        value: "{{ dag_run.conf.get('WRITE_MODE', params.get('WRITE_MODE', 'append')) }}"
+
+  executor:
+    instances: {{ dag_run.conf.get('executor_instances', params.executor_instances) }}
+    cores: 1
+    coreRequest: "500m"
+    coreLimit: "1"
+    memory: "1g"
+    env:
+      - name: PYTHONUNBUFFERED
+        value: "1"
+      # Not strictly required on executors, but harmless if set
+      - name: POLARIS_ALIAS
+        value: "{{ dag_run.conf.get('POLARIS_ALIAS', params.get('POLARIS_ALIAS', 'polaris')) }}"
+      - name: POLARIS_URI
+        value: "{{ dag_run.conf.get('POLARIS_URI', params.POLARIS_URI) }}"
+      - name: POLARIS_WAREHOUSE
+        value: "{{ dag_run.conf.get('POLARIS_WAREHOUSE', params.get('POLARIS_WAREHOUSE', '')) }}"
