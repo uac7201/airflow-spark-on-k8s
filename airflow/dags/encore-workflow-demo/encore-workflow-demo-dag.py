@@ -5,7 +5,7 @@ from airflow.utils import timezone
 from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-APP_FILE = "spark-postgres-extractor.yaml"
+APP_FILE = "spark-load-data.yaml"
 
 
 with DAG(
@@ -20,7 +20,7 @@ with DAG(
         "executor_instances": 1,
         "main_file": "local:///opt/app/encore-workflow-demo-dag.py",
         "APP_NAME": "encore-workflow-demo",
-        
+
         "USERNAME": "postgres",
         "PASSWORD": "mysecretpassword",
     },
