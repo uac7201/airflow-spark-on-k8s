@@ -29,13 +29,10 @@ with DAG(
         kubernetes_conn_id="kubernetes_default",
         do_xcom_push=False,
         params={
-            # image + app entry for the first job
             "spark_image": "mabi/encore-data-loader:latest",
             "spark_version": "4.0.0",
             "main_file": "local:///opt/app/load_postgres_data.py",
             "executor_instances": 1,
-
-            # any job-specific env for load job
             "USERNAME": "postgres",
             "PASSWORD": "mysecretpassword",
         },
@@ -52,7 +49,7 @@ with DAG(
             # use a different image / Spark version / entrypoint for Iceberg REST
             "spark_image_iceberg": "mabi/encore-spark-polaris-writer:latest",
             "spark_version": "4.0.0",
-            "main_file": "local:///opt/app/write_to_polaris.py",
+            "main_file": "local:///opt/app/polaris_writer.py",
             "executor_instances": 1,
             # Polaris env (read sensitive values from Airflow Variables)
             "POLARIS_URI": "https://enercity-encore_polaris.snowflakecomputing.com/polaris/api/catalog",
