@@ -1,0 +1,12 @@
+# pvc-azurefile.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: spark-shared-pvc
+  namespace: spark-operator
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: azurefile-csi          # <-- NOT the default disk class
+  resources:
+    requests:
+      storage: 10Gi
