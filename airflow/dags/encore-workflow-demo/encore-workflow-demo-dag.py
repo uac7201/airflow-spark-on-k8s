@@ -52,9 +52,9 @@ with DAG(
             "main_file": "local:///opt/app/polaris_writer.py",
             "executor_instances": 1,
             # Polaris env (read sensitive values from Airflow Variables)
-            "POLARIS_URI": "https://enercity-encore-polaris.snowflakecomputing.com/polaris/api/catalog",
-            "POLARIS_ALIAS": "polaris",
-            "POLARIS_OAUTH2_TOKEN_URL": "https://enercity-encore-polaris.snowflakecomputing.com/oauth/token",
+            "POLARIS_URI": "https://enercity-encore_polaris.snowflakecomputing.com/polaris/api/catalog",
+            "POLARIS_ALIAS": "polaris", 
+            "POLARIS_OAUTH2_TOKEN_URL": "https://enercity-encore_polaris.snowflakecomputing.com/oauth/token",
             "POLARIS_OAUTH2_CLIENT_ID": Variable.get("POLARIS_OAUTH2_CLIENT_ID"),
             "POLARIS_OAUTH2_CLIENT_SECRET": Variable.get("POLARIS_OAUTH2_CLIENT_SECRET"),
             "POLARIS_OAUTH2_SCOPE": "PRINCIPAL_ROLE:ALL",
