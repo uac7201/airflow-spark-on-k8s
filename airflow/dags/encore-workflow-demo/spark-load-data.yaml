@@ -1,0 +1,46 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: "{{ dag_run.conf.get('APP_NAME', params.APP_NAME) }}-{{ ts_nodash }}"
+  namespace: "{{ dag_run.conf.get('spark_namespace', params.spark_namespace) }}"
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  sparkVersion: "4.0.0"                    # or "3.5.1" — must match your image
+  image: "{{ dag_run.conf.get('spark_image', params.spark_image) }}"
+  imagePullPolicy: Always
+  mainApplicationFile: "{{ dag_run.conf.get('main_file', params.main_file) }}"
+  timeToLiveSeconds: 600
+
+  # If your image doesn't have the JDBC driver:
+  # sparkConf:
+  #   "spark.jars.packages": "org.postgresql:postgresql:42.7.3"
+
+  driver:
+    serviceAccount: spark
+    cores: 1
+    coreRequest: "500m"
+    coreLimit: "1"
+    memory: "512m"
+    labels: { version: "4.0.0" }          # keep consistent, or drop label
+    env:
+      - name: USERNAME
+        value: "{{ dag_run.conf.get('USERNAME', params.USERNAME) }}"
+      - name: PASSWORD
+        value: "{{ dag_run.conf.get('PASSWORD', params.PASSWORD) }}"
+
+
+  executor:
+    instances: {{ dag_run.conf.get('executor_instances', params.executor_instances) }}
+    cores: 1
+    coreRequest: "500m"
+    coreLimit: "1"
+    memory: "512m"
+    labels: { version: "4.0.0" }
+    env:
+      - name: USERNAME
+        value: "{{ dag_run.conf.get('USERNAME', params.USERNAME) }}"
+      - name: PASSWORD
+        value: "{{ dag_run.conf.get('PASSWORD', params.PASSWORD) }}"
+
