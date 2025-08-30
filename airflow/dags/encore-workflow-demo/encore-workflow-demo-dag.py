@@ -32,8 +32,7 @@ with DAG(
         application_file=APP_FILE,   # resolves via template_searchpath
         namespace="{{ dag_run.conf.get('spark_namespace', params.spark_namespace) }}",
         kubernetes_conn_id="kubernetes_default",
-        do_xcom_push=False,
-        attach_log=True, 
+        do_xcom_push=False 
     )
 
     load_data
