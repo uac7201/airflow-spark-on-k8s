@@ -21,7 +21,11 @@ spec:
   sparkConf:
     "spark.jars.packages": "org.postgresql:postgresql:42.7.3"
     "spark.kubernetes.submission.waitAppCompletion": "true"
-    "spark.jars.ivy": "/tmp/.ivy2"         # <-- add this
+    "spark.jars.ivy": "/tmp/.ivy2"
+    # ⬇️ Skip chmod/chown attempts on the mounted share
+    "spark.hadoop.fs.permissions.enabled": "false"
+    # Optional (helps if you later read paths with odd perms)
+    "spark.sql.files.ignorePermissionCheck": "true" 
 
 
   driver:
