@@ -48,7 +48,7 @@ with DAG(
         params={
             # use a different image / Spark version / entrypoint for Iceberg REST
             "spark_image_iceberg": "mabi/encore-spark-polaris-writer:latest",
-            "spark_version": "4.0.0",
+            "spark_version": "3.5.1",
             "main_file": "local:///opt/app/polaris_writer.py",
             "executor_instances": 1,
             # Polaris env (read sensitive values from Airflow Variables)
