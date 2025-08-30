@@ -9,7 +9,7 @@ spec:
   mode: cluster
 
   # Use Spark 3.5.x for best Iceberg runtime compatibility unless your image provides Spark 4 support.
-  sparkVersion: "{{ dag_run.conf.get('spark_version', params.get('spark_version', '3.5.1')) }}"
+  sparkVersion: "4.0.0"  
   image: "{{ dag_run.conf.get('spark_image_iceberg', params.spark_image_iceberg) }}"
   imagePullPolicy: Always
 
