@@ -29,7 +29,7 @@ with DAG(
         kubernetes_conn_id="kubernetes_default",
         do_xcom_push=False,
         params={
-           "spark_image": "mabi/encore-data-loader:latest",
+            "spark_image": "mabi/encore-data-loader:latest",
             "spark_version": "4.0.0",
             "main_file": "local:///opt/app/load_postgres_data.py",
             "executor_instances": 1,
@@ -52,12 +52,16 @@ with DAG(
             "main_file": "local:///opt/app/polaris_writer.py",
             "executor_instances": 1,
             # Polaris env (read sensitive values from Airflow Variables)
-            "POLARIS_URI": "https://enercity-encore_polaris.snowflakecomputing.com/polaris/api/catalog",
+            
+            "POLARIS_URI": "https://enercity-encorepolaris.privatelink.snowflakecomputing.com/polaris/api/catalog",
+            "POLARIS_OAUTH2_TOKEN_URL": "https://enercity-encorepolaris.privatelink.snowflakecomputing.com/polaris/api/catalog/v1/oauth/tokens",
+            "POLARIS_OAUTH2_SCOPE": "PRINCIPAL_ROLE:snowflake"
+
+
             "POLARIS_ALIAS": "polaris", 
-            "POLARIS_OAUTH2_TOKEN_URL": "https://enercity-encore_polaris.snowflakecomputing.com/oauth/token",
             "POLARIS_OAUTH2_CLIENT_ID": Variable.get("POLARIS_OAUTH2_CLIENT_ID"),
             "POLARIS_OAUTH2_CLIENT_SECRET": Variable.get("POLARIS_OAUTH2_CLIENT_SECRET"),
-            "POLARIS_OAUTH2_SCOPE": "PRINCIPAL_ROLE:ALL",
+          
             "TARGET_NAMESPACE": "spark_maik",
             "TARGET_TABLE": "maikspark_demo",
             "WRITE_MODE": "append",
