@@ -15,9 +15,10 @@ spec:
 
   sparkConf:
     "spark.jars.packages": "org.postgresql:postgresql:42.7.3"
-    # Optional: get fuller driver logs in Airflow
     "spark.kubernetes.submission.waitAppCompletion": "true"
+    "spark.jars.ivy": "/tmp/.ivy2"         # <-- add this
 
+    
   driver:
     serviceAccount: spark
     cores: 1
