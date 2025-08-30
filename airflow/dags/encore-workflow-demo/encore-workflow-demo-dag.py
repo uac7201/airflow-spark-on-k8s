@@ -18,7 +18,7 @@ with DAG(
         "spark_namespace": "spark-operator",
         "spark_image": "mabi/encore-data-loader:latest",
         "executor_instances": 1,
-        "main_file": "local:///opt/app/encore-workflow-demo-dag.py",
+        "main_file": "local:///opt/app/load_postgres_data.py",
         "APP_NAME": "encore-workflow-demo",
 
         "USERNAME": "postgres",
