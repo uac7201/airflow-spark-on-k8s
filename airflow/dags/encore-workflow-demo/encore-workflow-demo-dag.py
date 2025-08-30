@@ -27,20 +27,13 @@ with DAG(
     tags=["spark", "kubernetes", "spark-operator", "encore"],
 ) as dag:
     
-
     load_data = SparkKubernetesOperator(
         task_id="load_data",
         application_file=APP_FILE,   # resolves via template_searchpath
         namespace="{{ dag_run.conf.get('spark_namespace', params.spark_namespace) }}",
         kubernetes_conn_id="kubernetes_default",
         do_xcom_push=False,
-        params={
-            "APP_NAME": "encore-transform",
-            "main_file": "local:///opt/app/transform_data.py",
-            "USERNAME": "analytics_user",
-            "PASSWORD": "another_password",
-            "executor_instances": 2,
-        },
+        attach_log=True, 
     )
 
     load_data

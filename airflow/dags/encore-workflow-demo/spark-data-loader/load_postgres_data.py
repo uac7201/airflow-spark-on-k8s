@@ -6,7 +6,7 @@ pg_user = os.environ["USERNAME"]      # New: user from env var
 pg_password = os.environ["PASSWORD"]
 
 # JDBC URL to Postgres service in AKS
-url = "jdbc:postgresql://postgres.db.svc.cluster.local:5432/db"
+url = "jdbc:postgresql://pg-postgresql.db.svc.cluster.local:5432/appdb"
 
 # Connection properties
 props = {
