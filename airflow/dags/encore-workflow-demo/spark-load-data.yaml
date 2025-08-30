@@ -13,9 +13,9 @@ spec:
   mainApplicationFile: "{{ dag_run.conf.get('main_file', params.main_file) }}"
   timeToLiveSeconds: 600
   volumes:
-  - name: shared-pvc
-    persistentVolumeClaim:
-      claimName: spark-shared-pvc   # <-- create this PVC once (ReadWriteMany if possible)
+    - name: shared-pvc
+      persistentVolumeClaim:
+        claimName: spark-shared-pvc  # <-- create this PVC once (ReadWriteMany if possible)
 
 
   sparkConf:
@@ -31,6 +31,8 @@ spec:
     coreLimit: "1"
     memory: "512m"
     labels: { version: "4.0.0" }          # keep consistent, or drop label
+    securityContext:
+      fsGroup: 1000
     volumeMounts:
       - name: shared-pvc
         mountPath: /shared
@@ -48,10 +50,11 @@ spec:
     coreLimit: "1"
     memory: "512m"
     labels: { version: "4.0.0" }
-    executor:
+    securityContext:
+      fsGroup: 1000         # match the uid of your spark/app user
     volumeMounts:
       - name: shared-pvc
-        mountPath: /shared
+        mountPath: /shared  # <- your shared path
     env:
       - name: USERNAME
         value: "{{ dag_run.conf.get('USERNAME', params.USERNAME) }}"
