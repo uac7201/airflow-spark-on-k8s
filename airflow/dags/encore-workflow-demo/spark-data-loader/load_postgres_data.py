@@ -22,11 +22,11 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 df = spark.read.jdbc(url=url, table="widgets", properties=props)
-print("Row count:", df.count())
-df.show(truncate=False)   # print the rows to stdout
+print(f"Row count:{df.count()}", flush=True)
+df.show(truncate=False, flush=True)   # print the rows to stdout
 
 # Example: do something minor and write back as a demo
 out = df.selectExpr("id", "upper(name) as name_upper", "created_at")
-out.show(truncate=False)
+out.show(truncate=False, flush=True)
 
 spark.stop()
