@@ -22,21 +22,21 @@ with DAG(
 ) as dag:
 
     # ---------- Task 1: load_data (your current reader) ----------
-    load_data = SparkKubernetesOperator(
-        task_id="load_data",
-        application_file="spark-load-data.yaml",
-        namespace="{{ dag_run.conf.get('spark_namespace', params.spark_namespace) }}",
-        kubernetes_conn_id="kubernetes_default",
-        do_xcom_push=False,
-        params={
-            "spark_image": "mabi/encore-data-loader:latest",
-            "spark_version": "4.0.0",
-            "main_file": "local:///opt/app/load_postgres_data.py",
-            "executor_instances": 1,
-            "USERNAME": "postgres",
-            "PASSWORD": "mysecretpassword",
-        },
-    )
+#    load_data = SparkKubernetesOperator(
+#        task_id="load_data",
+#        application_file="spark-load-data.yaml",
+#        namespace="{{ dag_run.conf.get('spark_namespace', params.spark_namespace) }}",
+#        kubernetes_conn_id="kubernetes_default",
+#        do_xcom_push=False,
+#        params={
+ #           "spark_image": "mabi/encore-data-loader:latest",
+#            "spark_version": "4.0.0",
+##            "main_file": "local:///opt/app/load_postgres_data.py",
+#            "executor_instances": 1,
+#            "USERNAME": "postgres",
+#            "PASSWORD": "mysecretpassword",
+#        },
+#    )
 
     # ---------- Task 2: write_polaris (Polaris-only writer) ----------
     write_polaris = SparkKubernetesOperator(
@@ -59,9 +59,9 @@ with DAG(
             "POLARIS_OAUTH2_CLIENT_SECRET": Variable.get("POLARIS_OAUTH2_CLIENT_SECRET"),
             "POLARIS_OAUTH2_SCOPE": "PRINCIPAL_ROLE:ALL",
             "TARGET_NAMESPACE": "spark_maik",
-            "TARGET_TABLE": "maik_spark_demo",
+            "TARGET_TABLE": "maikspark_demo",
             "WRITE_MODE": "append",
         },
     )
 
-    load_data >> write_polaris
+    write_polaris
