@@ -17,6 +17,7 @@ with DAG(
     params={  # DAG-level defaults (used if not overridden by task params or dag_run.conf)
         "spark_namespace": "spark-operator",
         "APP_NAME": "encore-workflow-demo",
+        "PATH": "/shared/encore/tmp/widgets" 
     },
     tags=["spark", "kubernetes", "spark-operator", "encore"],
 ) as dag:
@@ -58,10 +59,9 @@ with DAG(
             "POLARIS_OAUTH2_TOKEN_URL": "https://enercity-encore_polaris.snowflakecomputing.com/oauth/token",
             "POLARIS_OAUTH2_CLIENT_ID": Variable.get("POLARIS_OAUTH2_CLIENT_ID"),
             "POLARIS_OAUTH2_CLIENT_SECRET": Variable.get("POLARIS_OAUTH2_CLIENT_SECRET"),
-          
             "TARGET_NAMESPACE": "spark_maik",
             "TARGET_TABLE": "maikspark_demo",
-            "WRITE_MODE": "append",
+            "WRITE_MODE": "append" # must match OUTPUT_PATH in j
         },
     )
 

@@ -1,4 +1,21 @@
-# pvc-azurefile.yaml
+# storageclass: azurefile-csi-0777
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azurefile-csi-0777
+provisioner: file.csi.azure.com
+allowVolumeExpansion: true
+mountOptions:
+  - dir_mode=0777
+  - file_mode=0777
+  - uid=1000
+  - gid=1000
+  - mfsymlinks
+  - nobrl
+parameters:
+  skuName: Standard_LRS   # or Premium_LRS
+---
+# pvc
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -6,7 +23,7 @@ metadata:
   namespace: spark-operator
 spec:
   accessModes: ["ReadWriteMany"]
-  storageClassName: azurefile-csi          # <-- NOT the default disk class
   resources:
     requests:
       storage: 10Gi
+  storageClassName: azurefile-csi-0777
