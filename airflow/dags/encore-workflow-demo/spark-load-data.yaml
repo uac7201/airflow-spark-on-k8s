@@ -12,13 +12,18 @@ spec:
   imagePullPolicy: Always
   mainApplicationFile: "{{ dag_run.conf.get('main_file', params.main_file) }}"
   timeToLiveSeconds: 600
+  volumes:
+  - name: shared-pvc
+    persistentVolumeClaim:
+      claimName: spark-shared-pvc   # <-- create this PVC once (ReadWriteMany if possible)
+
 
   sparkConf:
     "spark.jars.packages": "org.postgresql:postgresql:42.7.3"
     "spark.kubernetes.submission.waitAppCompletion": "true"
     "spark.jars.ivy": "/tmp/.ivy2"         # <-- add this
 
-    
+
   driver:
     serviceAccount: spark
     cores: 1
@@ -26,6 +31,9 @@ spec:
     coreLimit: "1"
     memory: "512m"
     labels: { version: "4.0.0" }          # keep consistent, or drop label
+    volumeMounts:
+      - name: shared-pvc
+        mountPath: /shared
     env:
       - name: USERNAME
         value: "{{ dag_run.conf.get('USERNAME', params.USERNAME) }}"
@@ -40,6 +48,10 @@ spec:
     coreLimit: "1"
     memory: "512m"
     labels: { version: "4.0.0" }
+    executor:
+    volumeMounts:
+      - name: shared-pvc
+        mountPath: /shared
     env:
       - name: USERNAME
         value: "{{ dag_run.conf.get('USERNAME', params.USERNAME) }}"
