@@ -58,8 +58,8 @@ with DAG(
             "POLARIS_OAUTH2_CLIENT_ID": Variable.get("POLARIS_OAUTH2_CLIENT_ID"),
             "POLARIS_OAUTH2_CLIENT_SECRET": Variable.get("POLARIS_OAUTH2_CLIENT_SECRET"),
             "POLARIS_OAUTH2_SCOPE": "PRINCIPAL_ROLE:ALL",
-            "TARGET_NAMESPACE": "spark-maik",
-            "TARGET_TABLE": "maik-spark-demo",
+            "TARGET_NAMESPACE": "spark_maik",
+            "TARGET_TABLE": "maik_spark_demo",
             "WRITE_MODE": "append",
         },
     )

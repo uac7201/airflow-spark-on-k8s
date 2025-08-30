@@ -22,8 +22,8 @@ OAUTH_CLIENT_ID     = env("POLARIS_OAUTH2_CLIENT_ID")
 OAUTH_CLIENT_SECRET = env("POLARIS_OAUTH2_CLIENT_SECRET")
 OAUTH_SCOPE         = env("POLARIS_OAUTH2_SCOPE")
 
-TARGET_NAMESPACE  = env("TARGET_NAMESPACE", "spark-maik")
-TARGET_TABLE      = env("TARGET_TABLE", "maik-spark-demo")
+TARGET_NAMESPACE  = env("TARGET_NAMESPACE", "spark_maik")
+TARGET_TABLE      = env("TARGET_TABLE", "maik_spark_demo")
 WRITE_MODE        = env("WRITE_MODE", "append")  # append|overwrite
 APP_NAME          = env("APP_NAME", "write-to-polaris")
 
