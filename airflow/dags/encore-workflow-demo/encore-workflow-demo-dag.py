@@ -34,6 +34,13 @@ with DAG(
         namespace="{{ dag_run.conf.get('spark_namespace', params.spark_namespace) }}",
         kubernetes_conn_id="kubernetes_default",
         do_xcom_push=False,
+        params={
+            "APP_NAME": "encore-transform",
+            "main_file": "local:///opt/app/transform_data.py",
+            "USERNAME": "analytics_user",
+            "PASSWORD": "another_password",
+            "executor_instances": 2,
+        },
     )
 
     load_data

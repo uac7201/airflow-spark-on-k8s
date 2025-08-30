@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 import os
 
 # Pull credentials from environment
-pg_user = os.environ["USER"]      # New: user from env var
+pg_user = os.environ["USERNAME"]      # New: user from env var
 pg_password = os.environ["PASSWORD"]
 
 # JDBC URL to Postgres service in AKS

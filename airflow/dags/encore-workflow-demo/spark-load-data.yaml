@@ -13,9 +13,10 @@ spec:
   mainApplicationFile: "{{ dag_run.conf.get('main_file', params.main_file) }}"
   timeToLiveSeconds: 600
 
-  # If your image doesn't have the JDBC driver:
-  # sparkConf:
-  #   "spark.jars.packages": "org.postgresql:postgresql:42.7.3"
+  sparkConf:
+    "spark.jars.packages": "org.postgresql:postgresql:42.7.3"
+    # Optional: get fuller driver logs in Airflow
+    "spark.kubernetes.submission.waitAppCompletion": "true"
 
   driver:
     serviceAccount: spark
