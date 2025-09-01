@@ -17,7 +17,8 @@ with DAG(
     params={  # DAG-level defaults (used if not overridden by task params or dag_run.conf)
         "spark_namespace": "spark-operator",
         "APP_NAME": "encore-workflow-demo",
-        "PATH": "/shared/encore/tmp/widgets" 
+        "PATH": "/shared/encore/tmp/widgets",
+        "executor_instances": 1,
     },
     tags=["spark", "kubernetes", "spark-operator", "encore"],
 ) as dag:
@@ -33,7 +34,7 @@ with DAG(
             "spark_image": "mabi/encore-spark-data-loader:latest",
             "spark_version": "4.0.0",
             "main_file": "local:///opt/app/load_postgres_data.py",
-            "executor_instances": 1,
+            
             "USERNAME": "postgres",
             "PASSWORD": "mysecretpassword",
         },
@@ -51,12 +52,11 @@ with DAG(
             "spark_image_iceberg": "mabi/encore-spark-polaris-writer:latest",
             "spark_version": "3.5.1",
             "main_file": "local:///opt/app/polaris_writer.py",
-            "executor_instances": 1,
             # Polaris env (read sensitive values from Airflow Variables)
             "POLARIS_URI": "https://enercity-encorepolaris.snowflakecomputing.com/polaris/api/catalog",
             "POLARIS_OAUTH2_SCOPE": "PRINCIPAL_ROLE:ALL",
             "POLARIS_ALIAS": "polaris", 
-            "POLARIS_OAUTH2_TOKEN_URL": "https://enercity-encorepolaris.snowflakecomputing.com/oauth/token",
+            "POLARIS_OAUTH2_TOKEN_URL": "https://enercity-encorepolaris.snowflakecomputing.com/oauth/token-request",
             "POLARIS_OAUTH2_CLIENT_ID": Variable.get("POLARIS_OAUTH2_CLIENT_ID"),
             "POLARIS_OAUTH2_CLIENT_SECRET": Variable.get("POLARIS_OAUTH2_CLIENT_SECRET"),
             "TARGET_NAMESPACE": "spark_maik",
