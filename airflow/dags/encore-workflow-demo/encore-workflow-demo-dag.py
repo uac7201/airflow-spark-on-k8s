@@ -19,6 +19,12 @@ with DAG(
         "APP_NAME": "encore-workflow-demo",
         "PATH": "/shared/encore/tmp/widgets",
         "executor_instances": 1,
+
+        "POSTGRES_TABLE_NAME": "widgets",
+
+        "TARGET_NAMESPACE": "spark_maik",
+        "TARGET_TABLE": "maikspark_demo",
+        "WRITE_MODE": "append" # must match OUTPUT_PATH in j
     },
     tags=["spark", "kubernetes", "spark-operator", "encore"],
 ) as dag:
@@ -60,9 +66,6 @@ with DAG(
             #"POLARIS_OAUTH2_TOKEN_URL": "https://enercity-encorepolaris.snowflakecomputing.com/oauth/token-request",
             "POLARIS_OAUTH2_CLIENT_ID": Variable.get("POLARIS_OAUTH2_CLIENT_ID"),
             "POLARIS_OAUTH2_CLIENT_SECRET": Variable.get("POLARIS_OAUTH2_CLIENT_SECRET"),
-            "TARGET_NAMESPACE": "spark_maik",
-            "TARGET_TABLE": "maikspark_demo",
-            "WRITE_MODE": "append" # must match OUTPUT_PATH in j
         },
     )
 

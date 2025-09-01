@@ -47,6 +47,8 @@ spec:
         value: "{{ dag_run.conf.get('PASSWORD', params.PASSWORD) }}"
       - name: OUTPUT_PATH
         value: "{{ dag_run.conf.get('PATH', params.get('PATH', 'append')) }}"   
+      - name: POSTGRES_TABLE_NAME
+        value: "{{ dag_run.conf.get('POSTGRES_TABLE_NAME', params.POSTGRES_TABLE_NAME) }}"
 
   executor:
     instances: {{ dag_run.conf.get('executor_instances', params.executor_instances) }}
@@ -65,4 +67,6 @@ spec:
         value: "{{ dag_run.conf.get('USERNAME', params.USERNAME) }}"
       - name: PASSWORD
         value: "{{ dag_run.conf.get('PASSWORD', params.PASSWORD) }}"
+      - name: POSTGRES_TABLE_NAME
+        value: "{{ dag_run.conf.get('POSTGRES_TABLE_NAME', params.POSTGRES_TABLE_NAME) }}"
 

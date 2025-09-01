@@ -5,6 +5,8 @@ print = functools.partial(builtins.print, flush=True)
 
 pg_user = os.environ["USERNAME"]
 pg_password = os.environ["PASSWORD"]
+pg_table_name = os.environ["POSTGRES_TABLE_NAME"]
+
 url = "jdbc:postgresql://pg-postgresql.db.svc.cluster.local:5432/appdb"
 props = {"user": pg_user, "password": pg_password, "driver": "org.postgresql.Driver", "ssl": "false"}
 
@@ -13,7 +15,7 @@ OUTPUT_PATH = os.getenv("OUTPUT_PATH", "/shared/encore/tmp/widgets")
 
 spark = SparkSession.builder.appName("ReadPostgresWidgets").getOrCreate()
 
-df = spark.read.jdbc(url=url, table="widgets", properties=props)
+df = spark.read.jdbc(url=url, table=pg_table_name, properties=props)
 print(f"Row count: {df.count()}")
 df.show(truncate=False); sys.stdout.flush()
 
