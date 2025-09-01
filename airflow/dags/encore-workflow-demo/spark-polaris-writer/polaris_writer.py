@@ -13,12 +13,12 @@ def env(name, default=None, required=False):
     return v
 
 # ==== Inputs (env) ====
-INPUT_PATH   = env("INPUT_PATH", required=True)                 # e.g. /shared/encore/tmp/widgets
+INPUT_PATH   = env("INPUT_PATH", required=True)                  # e.g. /shared/encore/tmp/widgets
 POLARIS_ALIAS= env("POLARIS_ALIAS", "polaris")
 
 # Accept either a full URI or an account identifier
-POLARIS_URI  = env("POLARIS_URI")                               # e.g. https://<acct>.snowflakecomputing.com/polaris/api/catalog
-CATALOG_ID   = env("POLARIS_CATALOG_ACCOUNT_IDENTIFIER", "rngtjdl-polaris")        # e.g. rngtjdl-polaris
+POLARIS_URI  = env("POLARIS_URI")                                # e.g. https://<acct>.snowflakecomputing.com/polaris/api/catalog
+CATALOG_ID   = env("POLARIS_CATALOG_ACCOUNT_IDENTIFIER", "rngtjdl-polaris")
 if not POLARIS_URI and CATALOG_ID:
     POLARIS_URI = f"https://{CATALOG_ID}.snowflakecomputing.com/polaris/api/catalog"
 if not POLARIS_URI:
@@ -29,31 +29,27 @@ OAUTH_CLIENT_ID     = env("POLARIS_OAUTH2_CLIENT_ID", required=True)
 OAUTH_CLIENT_SECRET = env("POLARIS_OAUTH2_CLIENT_SECRET", required=True)
 OAUTH_SCOPE         = env("POLARIS_OAUTH2_SCOPE", "PRINCIPAL_ROLE:ALL")
 
-# Optional extras
-POLARIS_WAREHOUSE   = env("POLARIS_WAREHOUSE")                  # only if your catalog needs it
+
+POLARIS_WAREHOUSE   = env("POLARIS_WAREHOUSE", "maik_warehouse")
 
 TARGET_NAMESPACE = env("TARGET_NAMESPACE", "spark_maik")
 TARGET_TABLE     = env("TARGET_TABLE", "maikspark_demo")
-WRITE_MODE       = env("WRITE_MODE", "append").lower()          # append | overwrite
+WRITE_MODE       = env("WRITE_MODE", "append").lower()           # append | overwrite
 APP_NAME         = env("APP_NAME", "write-to-polaris")
 
-# ===== Spark session (packages are better set via sparkConf in the YAML) =====
+# ===== Spark session (packages handled via sparkConf in YAML) =====
 builder = (SparkSession.builder
     .appName(APP_NAME)
     .config("spark.sql.extensions","org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions")
     .config("spark.sql.defaultCatalog", POLARIS_ALIAS)
     .config(f"spark.sql.catalog.{POLARIS_ALIAS}", "org.apache.iceberg.spark.SparkCatalog")
     .config(f"spark.sql.catalog.{POLARIS_ALIAS}.type", "rest")
-    # Polaris expects this header when it will vend cloud credentials to Iceberg
     .config(f"spark.sql.catalog.{POLARIS_ALIAS}.header.X-Iceberg-Access-Delegation", "vended-credentials")
     .config(f"spark.sql.catalog.{POLARIS_ALIAS}.uri", POLARIS_URI)
-    # Iceberg OAuth2: pass client creds and scope. (No token URL needed for Polaris.)
     .config(f"spark.sql.catalog.{POLARIS_ALIAS}.credential", f"{OAUTH_CLIENT_ID}:{OAUTH_CLIENT_SECRET}")
     .config(f"spark.sql.catalog.{POLARIS_ALIAS}.scope", OAUTH_SCOPE)
+    .config(f"spark.sql.catalog.{POLARIS_ALIAS}.warehouse", POLARIS_WAREHOUSE)  
 )
-
-if POLARIS_WAREHOUSE:
-    builder = builder.config(f"spark.sql.catalog.{POLARIS_ALIAS}.warehouse", POLARIS_WAREHOUSE)
 
 spark = builder.getOrCreate()
 
