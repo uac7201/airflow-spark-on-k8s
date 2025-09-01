@@ -23,7 +23,7 @@ spec:
 
   sparkConf:
     # Iceberg runtime (default: Spark 3.5, Scala 2.12). Override via dag_run.conf if you use a different Spark/Scala.
-    "spark.jars.packages": "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.9.1"
+    "spark.jars.packages": "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.6.1,org.apache.iceberg:iceberg-azure-bundle:1.6.1"
     "spark.kubernetes.submission.waitAppCompletion": "true"
     "spark.jars.ivy": "/tmp/.ivy2"
     # Optional: reduce driver log noise

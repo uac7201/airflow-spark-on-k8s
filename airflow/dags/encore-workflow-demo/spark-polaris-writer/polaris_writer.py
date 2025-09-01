@@ -13,46 +13,49 @@ def env(name, default=None, required=False):
     return v
 
 # ==== Inputs (env) ====
-INPUT_PATH         = env("INPUT_PATH", required=True)     # e.g. /shared/encore/tmp/widgets
-POLARIS_ALIAS      = env("POLARIS_ALIAS", "polaris")
-POLARIS_URI        = env("POLARIS_URI", required=True)
+INPUT_PATH   = env("INPUT_PATH", required=True)                 # e.g. /shared/encore/tmp/widgets
+POLARIS_ALIAS= env("POLARIS_ALIAS", "polaris")
 
-OAUTH_TOKEN_URL     = env("POLARIS_OAUTH2_TOKEN_URL")
-OAUTH_CLIENT_ID     = env("POLARIS_OAUTH2_CLIENT_ID")
-OAUTH_CLIENT_SECRET = env("POLARIS_OAUTH2_CLIENT_SECRET")
-OAUTH_SCOPE         = env("POLARIS_OAUTH2_SCOPE")
+# Accept either a full URI or an account identifier
+POLARIS_URI  = env("POLARIS_URI")                               # e.g. https://<acct>.snowflakecomputing.com/polaris/api/catalog
+CATALOG_ID   = env("POLARIS_CATALOG_ACCOUNT_IDENTIFIER", "rngtjdl-polaris")        # e.g. rngtjdl-polaris
+if not POLARIS_URI and CATALOG_ID:
+    POLARIS_URI = f"https://{CATALOG_ID}.snowflakecomputing.com/polaris/api/catalog"
+if not POLARIS_URI:
+    raise RuntimeError("Provide POLARIS_URI or POLARIS_CATALOG_ACCOUNT_IDENTIFIER")
 
-TARGET_NAMESPACE   = env("TARGET_NAMESPACE", "spark_maik")
-TARGET_TABLE       = env("TARGET_TABLE", "maikspark_demo")
-WRITE_MODE         = env("WRITE_MODE", "append").lower()  # append | overwrite
-APP_NAME           = env("APP_NAME", "write-to-polaris")
+# OAuth2 client-credentials (names match your YAML)
+OAUTH_CLIENT_ID     = env("POLARIS_OAUTH2_CLIENT_ID", required=True)
+OAUTH_CLIENT_SECRET = env("POLARIS_OAUTH2_CLIENT_SECRET", required=True)
+OAUTH_SCOPE         = env("POLARIS_OAUTH2_SCOPE", "PRINCIPAL_ROLE:ALL")
 
-spark = SparkSession.builder.appName(APP_NAME).getOrCreate()
+# Optional extras
+POLARIS_WAREHOUSE   = env("POLARIS_WAREHOUSE")                  # only if your catalog needs it
 
-# Polaris (Iceberg REST catalog)# Spark catalog config (keep your alias)
-spark.conf.set(f"spark.sql.catalog.{POLARIS_ALIAS}", "org.apache.iceberg.spark.SparkCatalog")
-spark.conf.set(f"spark.sql.catalog.{POLARIS_ALIAS}.type", "rest")
-spark.conf.set(f"spark.sql.catalog.{POLARIS_ALIAS}.uri", POLARIS_URI)
+TARGET_NAMESPACE = env("TARGET_NAMESPACE", "spark_maik")
+TARGET_TABLE     = env("TARGET_TABLE", "maikspark_demo")
+WRITE_MODE       = env("WRITE_MODE", "append").lower()          # append | overwrite
+APP_NAME         = env("APP_NAME", "write-to-polaris")
 
-# ✅ use the REST auth keys Iceberg expects
-spark.conf.set(f"spark.sql.catalog.{POLARIS_ALIAS}.rest.auth.type", "oauth2")
-spark.conf.set(f"spark.sql.catalog.{POLARIS_ALIAS}.oauth2-server-uri", OAUTH_TOKEN_URL)
+# ===== Spark session (packages are better set via sparkConf in the YAML) =====
+builder = (SparkSession.builder
+    .appName(APP_NAME)
+    .config("spark.sql.extensions","org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions")
+    .config("spark.sql.defaultCatalog", POLARIS_ALIAS)
+    .config(f"spark.sql.catalog.{POLARIS_ALIAS}", "org.apache.iceberg.spark.SparkCatalog")
+    .config(f"spark.sql.catalog.{POLARIS_ALIAS}.type", "rest")
+    # Polaris expects this header when it will vend cloud credentials to Iceberg
+    .config(f"spark.sql.catalog.{POLARIS_ALIAS}.header.X-Iceberg-Access-Delegation", "vended-credentials")
+    .config(f"spark.sql.catalog.{POLARIS_ALIAS}.uri", POLARIS_URI)
+    # Iceberg OAuth2: pass client creds and scope. (No token URL needed for Polaris.)
+    .config(f"spark.sql.catalog.{POLARIS_ALIAS}.credential", f"{OAUTH_CLIENT_ID}:{OAUTH_CLIENT_SECRET}")
+    .config(f"spark.sql.catalog.{POLARIS_ALIAS}.scope", OAUTH_SCOPE)
+)
 
-# client credentials are passed via the single 'credential' key as "<client_id>:<client_secret>"
-spark.conf.set(f"spark.sql.catalog.{POLARIS_ALIAS}.credential", f"{OAUTH_CLIENT_ID}:{OAUTH_CLIENT_SECRET}")
+if POLARIS_WAREHOUSE:
+    builder = builder.config(f"spark.sql.catalog.{POLARIS_ALIAS}.warehouse", POLARIS_WAREHOUSE)
 
-# optional but common with Polaris
-if OAUTH_SCOPE:
-    spark.conf.set(f"spark.sql.catalog.{POLARIS_ALIAS}.scope", OAUTH_SCOPE)
-aud = os.getenv("POLARIS_OAUTH2_AUDIENCE")
-if aud:
-    spark.conf.set(f"spark.sql.catalog.{POLARIS_ALIAS}.audience", aud)
-
-# --- OR: static bearer token instead of client creds ---
-TOKEN = os.getenv("POLARIS_BEARER_TOKEN")
-if TOKEN:
-    spark.conf.set(f"spark.sql.catalog.{POLARIS_ALIAS}.rest.auth.type", "token")
-    spark.conf.set(f"spark.sql.catalog.{POLARIS_ALIAS}.token", TOKEN)
+spark = builder.getOrCreate()
 
 full_table = f"{POLARIS_ALIAS}.{TARGET_NAMESPACE}.{TARGET_TABLE}"
 
@@ -73,14 +76,13 @@ exists = spark.sql(
 if not exists:
     writer = df.writeTo(full_table).using("iceberg").tableProperty("format-version", "2")
     if WRITE_MODE == "overwrite":
-        writer.createOrReplace()    # creates table and writes df
+        writer.createOrReplace()
         log.info(f"Created/replaced table {full_table} with {cnt} rows")
     else:
-        writer.create()             # creates table and writes df
+        writer.create()
         log.info(f"Created table {full_table} with {cnt} rows")
 else:
     if WRITE_MODE == "overwrite":
-        # dynamic partition overwrite (works for partitioned tables; for unpartitioned it replaces contents)
         df.writeTo(full_table).overwritePartitions()
         log.info(f"Overwrote partitions in {full_table} with {cnt} rows")
     else:
