@@ -7,7 +7,7 @@ spec:
   type: Python
   pythonVersion: "3"
   mode: cluster
-  image: mabi/spark-polaris-writer:d7f2f3807650644883c25a6bef3f1df72ecc79d5
+  image: mabi/spark-polaris-writer:a9e353bfe30f52addb16e1a20bbcfcf76af38c6c
   imagePullPolicy: Always
   mainApplicationFile: local:///opt/app/main.py
   sparkVersion: 3.5.1
