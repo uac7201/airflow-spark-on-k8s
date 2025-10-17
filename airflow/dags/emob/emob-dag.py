@@ -10,7 +10,7 @@ import os
 from airflow.models import Variable
 from airflow.operators.empty import EmptyOperator
 
-NAMESPACE = "airflow"
+NAMESPACE = "spark-operator"
 SERVICE_ACCOUNT = "spark"
 PVC_NAME = "airflow-dynamic-pvc-emob"
 KUBECTL_IMG = "mabi/airflow-pvc-creater:971cf3932fa40c708015597ed8a2b67730bb2eb"
