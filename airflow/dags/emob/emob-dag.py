@@ -10,7 +10,7 @@ import os
 from airflow.models import Variable
 from airflow.operators.empty import EmptyOperator
 
-NAMESPACE = "cx-airflow-encore-ns"
+NAMESPACE = "airflow"
 SERVICE_ACCOUNT = "spark"
 PVC_NAME = "airflow-dynamic-pvc-emob"
 KUBECTL_IMG = "mabi/parquet-creator:7786a7977ab6c3e4436c4496f8a9cc47eba343f4"

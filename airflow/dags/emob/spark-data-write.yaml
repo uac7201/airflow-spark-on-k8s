@@ -2,8 +2,7 @@ apiVersion: sparkoperator.k8s.io/v1beta2
 kind: SparkApplication
 metadata:
   name: emob-data-load
-  namespace: cx-airflow-encore-ns
-  
+  namespace: airflow
 spec:
   type: Python
   pythonVersion: "3"
