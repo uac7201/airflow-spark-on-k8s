@@ -142,7 +142,7 @@ with DAG(
         task_id="write_to_polaris",
         application_file="spark-apps/spark-data-write.yaml",
         kubernetes_conn_id="kubernetes_default",
-        namespace=NAMESPACE,
+        namespace="spark-operator",
         do_xcom_push=False,
         params={
             "PVC_CLAIM_NAME": PVC_NAME,
