@@ -95,7 +95,7 @@ with DAG(
             "--num-customers",
             "1000",
             "--output-path",
-            "/shared/encore/enercity_netz/emob/customer/customer_data.parquet",
+            "/shared/encore/enercity_ag/emob/customer/customer_data.parquet",
         ],
         volumes=[WORK_VOL],
         volume_mounts=[WORK_MOUNT],
