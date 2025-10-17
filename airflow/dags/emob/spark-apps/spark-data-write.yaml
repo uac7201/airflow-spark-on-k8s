@@ -1,13 +1,13 @@
 apiVersion: sparkoperator.k8s.io/v1beta2
 kind: SparkApplication
 metadata:
-  name: emob-data-load
+  name: emob-polaris-writer
   namespace: spark-operator
 spec:
   type: Python
   pythonVersion: "3"
   mode: cluster
-  image: mabi/spark-polaris-writer:152c9579e202f59efbc5024eb7e83c6a59cccb7a
+  image: mabi/spark-polaris-writer:d438a90f47b42323215a6c70c4554abdff157f7c
   imagePullPolicy: Always
   mainApplicationFile: local:///opt/app/main.py
   sparkVersion: 3.5.1
