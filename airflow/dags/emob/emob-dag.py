@@ -13,7 +13,7 @@ from airflow.operators.empty import EmptyOperator
 NAMESPACE = "airflow"
 SERVICE_ACCOUNT = "spark"
 PVC_NAME = "airflow-dynamic-pvc-emob"
-KUBECTL_IMG = "mabi/airflow-pvc-creater:971cf3932fa40c708015597ed8a2b67730bb2eb1"
+KUBECTL_IMG = "mabi/airflow-pvc-creater:971cf3932fa40c708015597ed8a2b67730bb2eb"
 MOUNT_PATH = "/shared/encore"
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
