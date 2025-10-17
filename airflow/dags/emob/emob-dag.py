@@ -53,7 +53,7 @@ with DAG(
         task_id="setup_pvc",
         name="setup-pvc",
         namespace=NAMESPACE,
-        service_account_name=SERVICE_ACCOUNT,
+        #  service_account_name=SERVICE_ACCOUNT,
         image=KUBECTL_IMG,
         image_pull_policy="IfNotPresent",
         cmds=["python3", "/app/app.py"],
