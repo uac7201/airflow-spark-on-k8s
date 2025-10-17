@@ -1,0 +1,97 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: emob-data-load
+  namespace: cx-airflow-encore-ns
+  
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: mabi/spark-polaris-writer:5bdbf49f0490a941a7465a1d1681b132f7eb3541
+  imagePullPolicy: Always
+  mainApplicationFile: local:///opt/app/main.py
+  sparkVersion: 3.5.1
+  timeToLiveSeconds: 60
+  volumes:
+  - name: shared-pvc
+    persistentVolumeClaim:
+      claimName: "{{ params.PVC_CLAIM_NAME }}"
+  restartPolicy:
+    type: Never
+
+  nodeSelector: {}
+
+  sparkConf:
+    "spark.jars": "local:///opt/spark/jars/iceberg-spark-runtime-3.5_2.12-1.6.1.jar,local:///opt/spark/jars/iceberg-azure-bundle-1.6.1.jar"
+    "spark.kubernetes.submission.waitAppCompletion": "true"
+
+  driver:
+    serviceAccount: spark
+    coreRequest: "100m"
+    coreLimit: "1"
+    memory: "512m"
+    volumeMounts:
+      - name: shared-pvc
+        mountPath: /shared/encore
+    env:
+      # Polaris / Iceberg REST
+      - name: POLARIS_ALIAS
+        value: "{{ dag_run.conf.get('POLARIS_ALIAS', params.get('POLARIS_ALIAS', 'polarisdev')) }}"
+      - name: POLARIS_URI
+        value: "{{ dag_run.conf.get('POLARIS_URI', params.POLARIS_URI) }}"
+      - name: POLARIS_WAREHOUSE
+        value: "{{ dag_run.conf.get('POLARIS_WAREHOUSE', params.get('POLARIS_WAREHOUSE', '')) }}"
+
+      - name: POLARIS_OAUTH2_TOKEN_URL
+        value: "{{ dag_run.conf.get('POLARIS_OAUTH2_TOKEN_URL', params.get('POLARIS_OAUTH2_TOKEN_URL', 'https://<your-host>/oauth/token')) }}"
+
+      - name: POLARIS_OAUTH2_CLIENT_ID
+        value: "{{ dag_run.conf.get('POLARIS_OAUTH2_CLIENT_ID', params.get('POLARIS_OAUTH2_CLIENT_ID', '')) }}"
+      - name: POLARIS_OAUTH2_CLIENT_SECRET
+        value: "{{ dag_run.conf.get('POLARIS_OAUTH2_CLIENT_SECRET', params.get('POLARIS_OAUTH2_CLIENT_SECRET', '')) }}"
+      - name: POLARIS_OAUTH2_SCOPE
+        value: "{{ dag_run.conf.get('POLARIS_OAUTH2_SCOPE', params.get('POLARIS_OAUTH2_SCOPE', 'PRINCIPAL_ROLE:ALL')) }}"
+
+      - name: WRITE_MODE
+        value: "{{ dag_run.conf.get('WRITE_MODE', params.get('WRITE_MODE', 'append')) }}"
+      - name: INPUT_PATH
+        value: "{{ dag_run.conf.get('INPUT_PATH', params.get('INPUT_PATH', 'append')) }}"   
+
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      capabilities:
+        drop: ["ALL"]
+    labels: { version: "3.5.1" }
+
+  executor:
+    instances: 1
+    coreRequest: "100m"
+    coreLimit: "1"
+    memory: "512m"
+    volumeMounts:
+      - name: shared-pvc
+        mountPath: /shared/encore
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      capabilities:
+        drop: ["ALL"]
+    labels: { version: "3.5.1" }
+    env:
+      - name: PYTHONUNBUFFERED
+        value: "1"
+      # Not strictly required on executors, but harmless if set
+      - name: POLARIS_ALIAS
+        value: "{{ dag_run.conf.get('POLARIS_ALIAS', params.get('POLARIS_ALIAS', 'polaris')) }}"
+      - name: POLARIS_URI
+        value: "{{ dag_run.conf.get('POLARIS_URI', params.POLARIS_URI) }}"
+      - name: POLARIS_WAREHOUSE
+        value: "{{ dag_run.conf.get('POLARIS_WAREHOUSE', params.get('POLARIS_WAREHOUSE', '')) }}"

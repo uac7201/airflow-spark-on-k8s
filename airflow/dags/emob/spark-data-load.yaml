@@ -1,0 +1,75 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: emob-data-load
+  namespace: cx-airflow-encore-ns
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: encoreacrdev.azurecr.io/spark-data-load-emob:3010afe0dd2085ffae0cae9cdab1eb43a32367b7
+  imagePullPolicy: Always
+  mainApplicationFile: local:///opt/app/load_ms_sql_data.py
+  sparkVersion: 4.0.0
+  timeToLiveSeconds: 600
+  volumes:
+  - name: shared-pvc
+    persistentVolumeClaim:
+      claimName: "{{ params.PVC_CLAIM_NAME }}"
+  restartPolicy:
+    type: Never
+
+  nodeSelector: {}
+  sparkConf:
+    spark.kubernetes.driver.pod.seccompProfile.type: RuntimeDefault
+    spark.kubernetes.executor.pod.seccompProfile.type: RuntimeDefault
+    spark.pyspark.python: python3
+    spark.pyspark.driver.python: python3
+
+  driver:
+    serviceAccount: spark
+    coreRequest: "100m"
+    coreLimit: "1"
+    memory: "512m"
+    volumeMounts:
+      - name: shared-pvc
+        mountPath: /shared/encore
+    env:
+      - name: EMOB_DB_HOST
+        value: "SRV-380"
+      - name: EMOB_DB_INSTANCE
+        value: "TEST9"
+      - name: EMOB_DB_NAME
+        value: "EWMS_TEST"
+      - name: EMOB_DB_USER
+        value: "dataplatform_read"
+      - name: EMOB_DB_PASSWORD
+        value: "{{ dag_run.conf.get('EMOB_DB_PASSWORD', params.EMOB_DB_PASSWORD) }}"
+
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      capabilities:
+        drop: ["ALL"]
+    labels: { version: "4.0.0" }
+
+  executor:
+    instances: 1
+    coreRequest: "100m"
+    coreLimit: "1"
+    memory: "512m"
+    volumeMounts:
+      - name: shared-pvc
+        mountPath: /shared/encore
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+      capabilities:
+        drop: ["ALL"]
+    labels: { version: "4.0.0" }
